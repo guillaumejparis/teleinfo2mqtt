@@ -106,6 +106,7 @@ class HistoryTicMode extends TicMode {
         // This includes the trailing space separator, matching the Enedis spec.
         const covered = line.slice(0, -1);
         const sum = [...covered].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        // eslint-disable-next-line no-bitwise
         return ((sum & 0x3F) + 0x20) === checksumChar.charCodeAt(0);
     }
 
@@ -157,7 +158,8 @@ class HistoryTicMode extends TicMode {
         case 'EJPHPM':
         case 'HCHC':
         case 'HCHP':
-            return value.length === 9 && (!previousValue || previousValue <= Number.parseInt(value, 10));
+            return value.length === 9
+                && (!previousValue || previousValue <= Number.parseInt(value, 10));
         case 'ADCO':
             return value.length === 12;
         default: return false;
