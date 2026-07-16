@@ -105,14 +105,9 @@ jobs:
         run: |
           TAG="$(echo '${{ github.ref_name }}' | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g' | sed -E 's/^-+|-+$//g')"
           TAGS="ghcr.io/${GITHUB_REPOSITORY,,}:${TAG}"
-          # On master: also push :latest
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+          # Also push :latest on master branch or any git tag
+          if [[ "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == refs/tags/* ]]; then
             TAGS="${TAGS},ghcr.io/${GITHUB_REPOSITORY,,}:latest"
-          fi
-          # On git tags (e.g. v1.2.3): also push bare semver (1.2.3) and :latest
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            BARE="${TAG#v}"
-            TAGS="${TAGS},ghcr.io/${GITHUB_REPOSITORY,,}:${BARE},ghcr.io/${GITHUB_REPOSITORY,,}:latest"
           fi
           echo "DOCKER_TAGS=$TAGS" >> $GITHUB_ENV
 
