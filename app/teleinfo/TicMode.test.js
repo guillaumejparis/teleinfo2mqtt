@@ -28,6 +28,7 @@ test.each([
     'getMode',
     'getBaudRate',
     'checkValue',
+    'verifyChecksum',
     'isFrameStart',
     'isFrameEnd',
     'getIdLabel',
@@ -70,6 +71,7 @@ test('disconnect should dicconnect from serial port when called', async () => {
 
 test('processData should parse frame lines without timestamp when called', async () => {
     const ticMode = new TicMode();
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
     jest.spyOn(ticMode, 'isFrameStart').mockImplementation(() => false);
     jest.spyOn(ticMode, 'isFrameEnd').mockImplementation(() => false);
@@ -83,6 +85,7 @@ test('processData should parse frame lines without timestamp when called', async
 
 test('processData should parse frame lines with timestamp and DST when called', async () => {
     const ticMode = new TicMode();
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
     jest.spyOn(ticMode, 'isFrameStart').mockImplementation(() => false);
     jest.spyOn(ticMode, 'isFrameEnd').mockImplementation(() => false);
@@ -101,6 +104,7 @@ test('processData should parse frame lines with timestamp and DST when called', 
 
 test('processData should parse frame lines with timestamp and no DST when called', async () => {
     const ticMode = new TicMode();
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
     jest.spyOn(ticMode, 'isFrameStart').mockImplementation(() => false);
     jest.spyOn(ticMode, 'isFrameEnd').mockImplementation(() => false);
@@ -125,14 +129,23 @@ test('processData should not process the frame line shorter than expected', asyn
 
 test('processData should not process the frame line when value is invalid', async () => {
     const ticMode = new TicMode();
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => false);
     jest.spyOn(ticMode, 'getValue').mockImplementation(({ lineItems }) => lineItems[1]);
     ticMode.processData('LABEL VALUE CHECKSUM');
     expect(ticMode.currentFrame.LABEL).toBeUndefined();
 });
 
+test('processData should not process the frame line when checksum is invalid', async () => {
+    const ticMode = new TicMode();
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => false);
+    ticMode.processData('LABEL VALUE CHECKSUM');
+    expect(ticMode.currentFrame.LABEL).toBeUndefined();
+});
+
 test('processData should not process the frame line when timestamp is invalid', async () => {
     const ticMode = new TicMode();
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'getValue').mockImplementation(({ lineItems }) => lineItems[2]);
     jest.spyOn(ticMode, 'getTimestamp').mockImplementation(({ lineItems }) => lineItems[1]);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
@@ -152,6 +165,7 @@ test('processData should publish event when frame ends', async () => {
         CURRENT: 'CURRENT',
     };
     ticMode.lastEmitTime = Date.parse('2020-12-31');
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'getValue').mockImplementation(({ lineItems }) => lineItems[1]);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
     jest.spyOn(ticMode, 'isFrameStart').mockImplementation(() => false);
@@ -169,6 +183,7 @@ test('processData should not publish event when frame date is under emit interva
     ticMode.currentFrame = {
         CURRENT: 'CURRENT',
     };
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'getValue').mockImplementation(({ lineItems }) => lineItems[1]);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
     jest.spyOn(ticMode, 'isFrameStart').mockImplementation(() => false);
@@ -185,6 +200,7 @@ test('processData should reset frame when frame starts', async () => {
     ticMode.currentFrame = {
         CURRENT: 'CURRENT',
     };
+    jest.spyOn(ticMode, 'verifyChecksum').mockImplementation(() => true);
     jest.spyOn(ticMode, 'getValue').mockImplementation(({ lineItems }) => lineItems[1]);
     jest.spyOn(ticMode, 'checkValue').mockImplementation(() => true);
     jest.spyOn(ticMode, 'isFrameStart').mockImplementation(() => true);
