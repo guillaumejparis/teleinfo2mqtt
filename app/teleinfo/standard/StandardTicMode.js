@@ -124,7 +124,8 @@ class StandardTicMode extends TicMode {
 
     /**
      * Verify the Standard TIC (Linky) checksum.
-     * Algorithm (Enedis spec): SUM of all bytes from label through the last tab`r`n     * before the checksum character, then (result & 0x3F) + 0x20.
+     * Algorithm (Enedis spec): SUM of all bytes from label through the last tab
+     * before the checksum character, then (result & 0x3F) + 0x20.
      * @param dataStr
      * @return {boolean}
      */
