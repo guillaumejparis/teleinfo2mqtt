@@ -1,6 +1,6 @@
 {
   "name": "teleinfo2mqtt-app",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Publish teleinfo to mqtt topics",
   "main": "index.js",
   "scripts": {
