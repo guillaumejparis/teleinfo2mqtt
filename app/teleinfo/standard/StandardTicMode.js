@@ -124,8 +124,7 @@ class StandardTicMode extends TicMode {
 
     /**
      * Verify the Standard TIC (Linky) checksum.
-     * Algorithm (Enedis spec): XOR of all bytes from label through the last tab
-     * before the checksum character, then (result & 0x3F) + 0x20.
+     * Algorithm (Enedis spec): SUM of all bytes from label through the last tab`n     * before the checksum character, then (result & 0x3F) + 0x20.
      * @param dataStr
      * @return {boolean}
      */
@@ -139,9 +138,9 @@ class StandardTicMode extends TicMode {
         // This includes the trailing tab separator, matching the Enedis spec.
         const covered = line.slice(0, -1);
         // eslint-disable-next-line no-bitwise
-        const xor = [...covered].reduce((acc, c) => acc ^ c.charCodeAt(0), 0);
+        const sum = [...covered].reduce((acc, c) => acc + c.charCodeAt(0), 0);
         // eslint-disable-next-line no-bitwise
-        return ((xor & 0x3F) + 0x20) === checksumChar.charCodeAt(0);
+        return ((sum & 0x3F) + 0x20) === checksumChar.charCodeAt(0);
     }
 
     /**
