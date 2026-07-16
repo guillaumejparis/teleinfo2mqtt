@@ -153,11 +153,11 @@ test.each([
 );
 
 test.each([
-    // Checksums computed with Standard TIC algorithm: XOR of covered bytes, (xor & 0x3F) + 0x20
-    { data: 'EASF06\t000000000\tG', parsedFrame: { EASF06: { raw: '000000000', value: 0 } } },
-    { data: 'NGTF\tH PLEINE/CREUSE\t0', parsedFrame: { NGTF: { raw: 'H PLEINE/CREUSE', value: 'H PLEINE/CREUSE' } } },
-    { data: 'SMAXSN\tE220609060531\t02740\tI', parsedFrame: { SMAXSN: { raw: '02740', value: 2740, timestamp: { date: '2022-06-09T06:05:31.000Z', dst: 'summer' } } } },
-    { data: 'DATE\tE220609060531\t\t6', parsedFrame: { DATE: { raw: '', value: '', timestamp: { date: '2022-06-09T06:05:31.000Z', dst: 'summer' } } } },
+    // Checksums computed with Standard TIC algorithm: SUM of covered bytes, (sum & 0x3F) + 0x20
+    { data: 'EAST\\t039209454\\t3', parsedFrame: { EAST: { raw: '039209454', value: 39209454 } } },
+    { data: 'NGTF\\tH PLEINE/CREUSE\\t<', parsedFrame: { NGTF: { raw: 'H PLEINE/CREUSE', value: 'H PLEINE/CREUSE' } } },
+    { data: 'SMAXSN\\tE220609060531\\t02740\\t9', parsedFrame: { SMAXSN: { raw: '02740', value: 2740, timestamp: { date: '2022-06-09T06:05:31.000Z', dst: 'summer' } } } },
+    { data: 'DATE\\tE220609060531\\t\\t@', parsedFrame: { DATE: { raw: '', value: '', timestamp: { date: '2022-06-09T06:05:31.000Z', dst: 'summer' } } } },
 ])(
     'processData should process frame as expected',
     ({ data, parsedFrame }) => {
@@ -169,10 +169,10 @@ test.each([
 
 test('verifyChecksum should return true for a valid Standard TIC line', () => {
     const ticMode = new StandardTicMode();
-    expect(ticMode.verifyChecksum('EASF06\t000000000\tG')).toBeTruthy();
+    expect(ticMode.verifyChecksum('EAST\\t039209454\\t3')).toBeTruthy();
 });
 
 test('verifyChecksum should return false for a corrupted Standard TIC line', () => {
     const ticMode = new StandardTicMode();
-    expect(ticMode.verifyChecksum('EASF06\t001656439\tG')).toBeFalsy();
+    expect(ticMode.verifyChecksum('EAST\\t039209454\\t4')).toBeFalsy();
 });
