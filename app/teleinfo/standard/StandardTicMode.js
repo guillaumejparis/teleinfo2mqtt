@@ -123,6 +123,26 @@ class StandardTicMode extends TicMode {
     }
 
     /**
+     * Verify the Standard TIC (Linky) checksum.
+     * Algorithm (Enedis spec): XOR of all bytes from label through the last HT
+     * (tab) before the checksum character, then (result & 0x3F) + 0x20.
+     * @param dataStr
+     * @return {boolean}
+     */
+    /* eslint-disable class-methods-use-this */
+    verifyChecksum(dataStr) {
+        // Strip trailing CR if present (ReadlineParser splits on LF, keeps CR)
+        const line = dataStr.replace(/\r$/, '');
+        if (line.length < 2) return false;
+        const checksumChar = line[line.length - 1];
+        // Covered bytes: everything except the final checksum character.
+        // This includes the trailing tab separator, matching the Enedis spec.
+        const covered = line.slice(0, -1);
+        const xor = [...covered].reduce((acc, c) => acc ^ c.charCodeAt(0), 0);
+        return ((xor & 0x3F) + 0x20) === checksumChar.charCodeAt(0);
+    }
+
+    /**
      * Get the value of the label.
      * @param label
      * @param lineItems
@@ -287,7 +307,7 @@ class StandardTicMode extends TicMode {
         case 'ERQ2':
         case 'ERQ3':
         case 'ERQ4':
-            return value.length === 9 && (!previousValue || previousValue <= value);
+            return value.length === 9 && (!previousValue || previousValue <= Number.parseInt(value, 10));
         case 'ADSC':
             return value.length === 12;
         case 'PRM':
