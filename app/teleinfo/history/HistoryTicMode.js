@@ -90,6 +90,26 @@ class HistoryTicMode extends TicMode {
     }
 
     /**
+     * Verify the Historical TIC checksum.
+     * Algorithm (Enedis spec): sum of all bytes from label through the space
+     * separator before the checksum character, then (result & 0x3F) + 0x20.
+     * @param dataStr
+     * @return {boolean}
+     */
+    /* eslint-disable class-methods-use-this */
+    verifyChecksum(dataStr) {
+        // Strip trailing CR if present (ReadlineParser splits on LF, keeps CR)
+        const line = dataStr.replace(/\r$/, '');
+        if (line.length < 2) return false;
+        const checksumChar = line[line.length - 1];
+        // Covered bytes: everything except the final checksum character.
+        // This includes the trailing space separator, matching the Enedis spec.
+        const covered = line.slice(0, -1);
+        const sum = [...covered].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        return ((sum & 0x3F) + 0x20) === checksumChar.charCodeAt(0);
+    }
+
+    /**
      * Check the value.
      * @param label
      * @param previousValue
@@ -137,7 +157,7 @@ class HistoryTicMode extends TicMode {
         case 'EJPHPM':
         case 'HCHC':
         case 'HCHP':
-            return value.length === 9 && (!previousValue || previousValue <= value);
+            return value.length === 9 && (!previousValue || previousValue <= Number.parseInt(value, 10));
         case 'ADCO':
             return value.length === 12;
         default: return false;

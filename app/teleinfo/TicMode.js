@@ -99,6 +99,12 @@ class TicMode {
             return;
         }
 
+        // Verify TIC checksum before any further processing
+        if (!this.verifyChecksum(dataStr)) {
+            log.warn(`Invalid checksum for line [${dataStr}]`);
+            return;
+        }
+
         const label = lineItems[0];
         const value = this.getValue({ label, lineItems });
 
@@ -279,6 +285,18 @@ class TicMode {
     /* eslint-disable no-unused-vars */
     checkValue({ label, previousValue, value }) {
         throw new Error('checkValue must be overridden');
+    }
+
+    /**
+     * Verify the TIC checksum of a raw data line.
+     * Must be overridden by subclasses (algorithm differs between modes).
+     * @param dataStr
+     * @return {boolean}
+     */
+    /* eslint-disable class-methods-use-this */
+    /* eslint-disable no-unused-vars */
+    verifyChecksum(dataStr) {
+        throw new Error('verifyChecksum must be overridden');
     }
 
     /**
